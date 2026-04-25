@@ -23,7 +23,6 @@ def parse_node(state: AgentState) -> AgentState:
     Analyze this job description and extract exact technology keywords and requirements.
     Job Description: {state['job_description']}
     Respond ONLY with valid JSON, no explanation, no markdown: {{ "keywords": [], requirements: []}}
-    Example: {json.dumps(example_output, indent=2)}
     """
     # Invoke the LLM to get the raw response
     raw = llm.invoke(prompt)

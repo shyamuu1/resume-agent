@@ -1,6 +1,7 @@
 from nodes.parser import parse_node
 from nodes.analyzer import analyze_node
 from nodes.rewriter import rewriter_node
+from nodes.scorer import scorer_node
 
 state = {
     "job_description": """
@@ -30,15 +31,19 @@ state = {
     "iteration": 0
 }
 
-# Chain all three nodes
+# Chain all four nodes
 state = parse_node(state)
 state = analyze_node(state)
 state = rewriter_node(state)
+state = scorer_node(state)
 
-print("\n--- Original Resume ---")
-print(state["raw_resume"])
-
-print("\n--- Tailored Resume ---")
+print("\n--- Final Tailored Resume ---")
 print(state["tailored_resume"])
 
-print(f"\n--- Iteration: {state['iteration']} ---")
+print("\n--- Score Report ---")
+print(f"  ATS Score:  {state['ats_score']}/100")
+print(f"  Iteration:  {state['iteration']}")
+
+print("\n--- Suggestions ---")
+for s in state["suggestions"]:
+    print(f"  • {s}")
