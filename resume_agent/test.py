@@ -1,8 +1,8 @@
 from nodes.parser import parse_node
 from nodes.analyzer import analyze_node
+from nodes.rewriter import rewriter_node
 
-# Run parser first, feed output into analyzer
-test_state = {
+state = {
     "job_description": """
         We are looking for a Senior Python Developer with experience in
         REST APIs, PostgreSQL, and AWS. The ideal candidate has 3+ years
@@ -30,20 +30,15 @@ test_state = {
     "iteration": 0
 }
 
-# Chain the two nodes
-test_state = parse_node(test_state)
-test_state = analyze_node(test_state)
+# Chain all three nodes
+state = parse_node(state)
+state = analyze_node(state)
+state = rewriter_node(state)
 
-print("\n--- Gap Analysis ---")
-print("\n Strong Matches:")
-for item in test_state["gap_analysis"]["strong_matches"]:
-    print(f"   ✓ {item}")
+print("\n--- Original Resume ---")
+print(state["raw_resume"])
 
-print("\n Weak Matches:")
-for item in test_state["gap_analysis"]["weak_matches"]:
-    print(f"   ~ {item}")
+print("\n--- Tailored Resume ---")
+print(state["tailored_resume"])
 
-print("\n Missing:")
-for item in test_state["gap_analysis"]["missing"]:
-    print(f"   ✗ {item}")
-
+print(f"\n--- Iteration: {state['iteration']} ---")
