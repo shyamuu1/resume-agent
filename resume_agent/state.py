@@ -2,9 +2,14 @@ from typing import TypedDict
 
 class AgentState(TypedDict):
     #Inputs
-    job_description: str
+    raw_job_posting: str
+    
     raw_resume: str
 
+    #Cleaned and structured
+    job_description: str
+    structured_job_posting: dict
+    
     #Intermediate 
     jd_keywords: list[str]
     jd_requirements: list[str]

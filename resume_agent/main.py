@@ -1,21 +1,30 @@
 from graph import graph
 from state import AgentState
+from tools.scraper import scrape_job_description
 
-def run_agent(job_description: str, raw_resume: str) -> AgentState:
+
+def run_agent(job_url: str, raw_resume: str) -> AgentState:
+
     print("\n========================================")
     print("   Resume Tailoring Agent Starting...")
     print("========================================\n")
 
+    print(">> Scraping job posting...")
+    raw_job_posting = scrape_job_description(job_url)
+    print(f"   Scraped {len(raw_job_posting)} characters")
+
     initial_state = {
-        "job_description": job_description,
-        "raw_resume":      raw_resume,
-        "jd_keywords":     [],
-        "jd_requirements": [],
-        "gap_analysis":    {},
-        "tailored_resume": "",
-        "ats_score":       0,
-        "suggestions":     [],
-        "iteration":       0
+        "raw_job_posting":        raw_job_posting,
+        "raw_resume":             raw_resume,
+        "job_description":        "",
+        "structured_job_posting": {},
+        "jd_keywords":            [],
+        "jd_requirements":        [],
+        "gap_analysis":           {},
+        "tailored_resume":        "",
+        "ats_score":              0,
+        "suggestions":            [],
+        "iteration":              0
     }
 
     result = graph.invoke(initial_state)
@@ -36,12 +45,7 @@ def run_agent(job_description: str, raw_resume: str) -> AgentState:
     return result
 
 if __name__ == "__main__":
-    job_description = """
-        We are looking for a Senior Python Developer with experience in
-        REST APIs, PostgreSQL, and AWS. The ideal candidate has 3+ years
-        of backend development, strong communication skills, and experience
-        with Docker and CI/CD pipelines.
-    """
+    job_url = "https://job-boards.greenhouse.io/reddit/jobs/6909091?gh_src=8a8a4d8a1us"
 
     raw_resume = """
         John Doe | john@email.com
@@ -56,4 +60,4 @@ if __name__ == "__main__":
         Python, Flask, FastAPI, MySQL, Git, Linux
     """
 
-    run_agent(job_description, raw_resume)
+    run_agent(job_url, raw_resume)

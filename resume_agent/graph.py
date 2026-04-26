@@ -1,5 +1,6 @@
 from state import AgentState
 from langgraph.graph import StateGraph, END
+from nodes.cleaner import cleaner_node
 from nodes.parser import parse_node
 from nodes.analyzer import analyze_node
 from nodes.rewriter import rewriter_node
@@ -31,13 +32,16 @@ def build_graph() -> StateGraph:
     builder = StateGraph(AgentState)
 
     # Register nodes
+    builder.add_node("cleaner", cleaner_node)
     builder.add_node("parser", parse_node)
     builder.add_node("analyzer", analyze_node)
     builder.add_node("rewriter", rewriter_node)
     builder.add_node("scorer", scorer_node)
 
-    # Linear Edges
-    builder.set_entry_point("parser")
+    # Linear Edges 
+    # cleaner -> parser -> analyzer -> rewriter -> scorer
+    builder.set_entry_point("cleaner")
+    builder.add_edge("cleaner", "parser")
     builder.add_edge("parser", "analyzer")
     builder.add_edge("analyzer", "rewriter")
     builder.add_edge("rewriter", "scorer")
