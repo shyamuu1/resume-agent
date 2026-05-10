@@ -63,7 +63,7 @@ def scorer_node(state:AgentState) -> dict:
 
     if violations:
         print(f"   ATS Score: {ats_score}/100 | Passed: {passed}")
-
+        
     return {
         **state,
         "ats_score":   ats_score,
