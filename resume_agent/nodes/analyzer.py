@@ -1,16 +1,14 @@
 # analyzer.py
 
 import json
-import re
-from langchain_ollama import OllamaLLM
 from state import AgentState
+from utils.llm_utils import get_Logger, invoke_llm, parse_json, require_keys
 
-
-llm = OllamaLLM(model="llama3.2")
+logger = get_Logger("AnalyzerNode")
 
 def analyze_node(state:AgentState) -> dict:
-    print(">>> Running analyzer node ...")
-
+    logger.info(">>> Running analyzer node ...")
+    require_keys(state, "jd_requirements", "jd_keywords", "raw_resume")
     prompt = f"""
     Compare this resume against the job requirements and classify each requirement.
 
@@ -30,17 +28,17 @@ def analyze_node(state:AgentState) -> dict:
         "missing": ["requirement name not found in resume"]
     }}
     """
-    raw = llm.invoke(prompt)
-    cleaned = re.sub(r"```json|```", "", raw).strip()
+
+    cleaned = invoke_llm(prompt)
     try:
-        parsed = json.loads(cleaned)
+        parsed = parse_json(cleaned)
         gap_analysis = {
             "strong_matches": parsed.get("strong_matches", []),
             "weak_matches": parsed.get("weak_matches", []),
             "missing": parsed.get("missing", [])
         }
     except json.JSONDecodeError:
-        print("Warning: Could not parse Json, defaulting to empty gap analysis.")
+        logger.warning("Warning: Could not parse Json, defaulting to empty gap analysis.")
         gap_analysis = {
             "strong_matches": [],
             "weak_matches": [],
@@ -49,5 +47,5 @@ def analyze_node(state:AgentState) -> dict:
     strong = len(gap_analysis["strong_matches"])
     weak = len(gap_analysis["weak_matches"])
     missing = len(gap_analysis["missing"])
-    print(f"Gap Analysis: {strong} strong matches, {weak} weak matches, {missing} missing requirements.")
+    logger.info(f"Gap Analysis: {strong} strong matches, {weak} weak matches, {missing} missing requirements.")
     return {**state, "gap_analysis": gap_analysis}

@@ -3,8 +3,7 @@ from langchain_ollama import OllamaLLM
 import re
 import json
 from state import AgentState
-
-llm = OllamaLLM(model="llama3.2")
+from utils.llm_utils import get_Logger, invoke_llm, parse_json, require_keys
 
 #Patterns to strip before using LLM
 NOISE_PATTERNS = [
@@ -21,6 +20,8 @@ NOISE_PATTERNS = [
     r"#{1,6}\s*",            # markdown headers from Jina
 ]
 
+logger = get_Logger("CleanerNode")
+
 def clean_raw_text(text:str) -> str:
     for pattern in NOISE_PATTERNS:
         text = re.sub(pattern, "", text, flags=re.IGNORECASE)
@@ -30,8 +31,8 @@ def clean_raw_text(text:str) -> str:
     return text.strip()
 
 def cleaner_node(state: AgentState) -> dict:
-    print(">>> Cleaning raw job description and resume text...")
-
+    logger.info(">>> Cleaning raw job description and resume text...")
+    require_keys(state, "job_description")
     #1. Clean noise patterns
     pre_cleaned = clean_raw_text(state["job_description"])
 
@@ -73,11 +74,10 @@ def cleaner_node(state: AgentState) -> dict:
         "about_company": ""
     }}
     """
-    raw = llm.invoke(prompt)
-    cleaned = re.sub(r"```json|```", "", raw).strip()
+    cleaned = invoke_llm(prompt)
 
     try:
-        structured = json.loads(cleaned)
+        structured = parse_json(cleaned)
         #Rebuild a clean job description for down stream nodes
         cleaned_jd = f"""
         Job Title: {structured.get('job_title', '')}
@@ -98,9 +98,9 @@ def cleaner_node(state: AgentState) -> dict:
         {structured.get('about_company', '')}
         """
 
-        print(f"   Cleaned: {structured.get('job_title')} at {structured.get('company')}")
+        logger.info(f"   Cleaned: {structured.get('job_title')} at {structured.get('company')}")
     except json.JSONDecodeError:
-        print("   Warning: Could not structure JSON, using pre-cleaned text")
+        logger.warning("   Warning: Could not structure JSON, using pre-cleaned text")
         cleaned_jd = pre_cleaned
         structured = {}
         

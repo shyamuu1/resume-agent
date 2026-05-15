@@ -5,8 +5,12 @@ from nodes.parser import parse_node
 from nodes.analyzer import analyze_node
 from nodes.rewriter import rewriter_node
 from nodes.scorer import scorer_node
+from utils.llm_utils import get_Logger
+
+logger = get_Logger("StateGraphBuilder")
 
 def should_retry(state: AgentState) -> str:
+    logger.info(">>> Evaluating whether to retry based on ATS score and iteration count...")
     """
     Decision node — after scoring, decide whether to retry rewrite or finish.
     Retry conditions:
@@ -17,19 +21,20 @@ def should_retry(state: AgentState) -> str:
     iteration = state.get("iteration")
 
     if iteration >= 3:
-        print(f"   Exceeded maximum iterations. Finishing.")
+        logger.info(f"   Exceeded maximum iterations. Finishing.")
         return END
 
     if ats_score < 75:
-        print(f"   Score {ats_score} below 75, retrying... (attempt {iteration + 1}/3)")
+        logger.info(f"   Score {ats_score} below 75, retrying... (attempt {iteration + 1}/3)")
         return "rewriter"
     
-    print(f"   Score {ats_score} passed! Finishing.")
+    logger.info(f"   Score {ats_score} passed! Finishing.")
     return END
 
 # Define the graph structure
 def build_graph() -> StateGraph:
     builder = StateGraph(AgentState)
+    logger.info("Building state graph with nodes: cleaner -> parser -> analyzer -> rewriter -> scorer")
 
     # Register nodes
     builder.add_node("cleaner", cleaner_node)

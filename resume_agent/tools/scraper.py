@@ -1,7 +1,9 @@
 """Scraper Module"""
 
 import urllib
+from utils.llm_utils import get_Logger
 
+logger = get_Logger("ScraperNode")
 
 def scrape_job_description(url: str) -> str:
     """
@@ -16,5 +18,5 @@ def scrape_job_description(url: str) -> str:
             if response.status == 200:
                 return response.read().decode("utf-8")
     except Exception as e:
-        print(f"Error fetching job description: {e}")
+        logger.error(f"Error fetching job description: {e}")
         return ""

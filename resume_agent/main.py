@@ -1,6 +1,10 @@
+import textwrap
 from graph import graph
 from state import AgentState
 from tools.scraper import scrape_job_description
+from utils.llm_utils import get_Logger
+
+logger = get_Logger("Main")
 
 
 def run_agent(job_url: str, raw_resume: str) -> AgentState:
@@ -29,18 +33,18 @@ def run_agent(job_url: str, raw_resume: str) -> AgentState:
 
     result = graph.invoke(initial_state)
 
-    print("\n========================================")
-    print("   Agent Complete")
-    print("========================================")
-    print(f"\n Final ATS Score : {result['ats_score']}/100")
-    print(f" Total Iterations: {result['iteration']}")
+    logger.info("\n========================================")
+    logger.info("   Agent Complete")
+    logger.info("========================================")
+    logger.info(f"\n Final ATS Score : {result['ats_score']}/100")
+    logger.info(f" Total Iterations: {result['iteration']}")
 
-    print("\n--- Tailored Resume ---\n")
-    print(result["tailored_resume"])
+    logger.info("\n--- Tailored Resume ---\n")
+    logger.info(result["tailored_resume"])
 
-    print("\n--- Suggestions for Further Improvement ---")
+    logger.info("\n--- Suggestions for Further Improvement ---")
     for s in result["suggestions"]:
-        print(f"  • {s}")
+        logger.info(f"  • {s}")
 
     return result
 
@@ -59,5 +63,5 @@ if __name__ == "__main__":
         SKILLS
         Python, Flask, FastAPI, MySQL, Git, Linux
     """
-
-    run_agent(job_url, raw_resume)
+    dedent_raw_resume = textwrap.dedent(raw_resume)
+    run_agent(job_url, dedent_raw_resume)

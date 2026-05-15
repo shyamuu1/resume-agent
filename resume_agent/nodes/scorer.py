@@ -3,13 +3,13 @@
 import json
 import re
 from state import AgentState
-from langchain_ollama import OllamaLLM
+from utils.llm_utils import get_Logger, invoke_llm, parse_json, require_keys
 
-llm = OllamaLLM(model="llama3.2")
+logger = get_Logger("ScorerNode")
 
 def scorer_node(state:AgentState) -> dict:
-    print(" >>> Running scorer node... ")
-    
+    logger.info(">>> Running scorer node... ")
+    require_keys(state, "jd_keywords", "jd_requirements", "raw_resume", "tailored_resume")
     prompt = f"""
      You are an ATS (Applicant Tracking System) and resume quality evaluator.
 
@@ -43,26 +43,25 @@ def scorer_node(state:AgentState) -> dict:
         "passed": <true if ats_score >= 75 and integrity_violations is empty, else false>
     }}
     """
-    raw = llm.invoke(prompt)
-    cleaned = re.sub(r"```json|```", "", raw).strip()
+    cleaned = invoke_llm(prompt)
 
     try:
-        parsed = json.loads(cleaned)
+        parsed = parse_json(cleaned)
         ats_score = parsed.get("ats_score", 0)
         suggestions = parsed.get("suggestions", [])
         violations = parsed.get("integrity_violations", [])
         passed = parsed.get("passed", False)
 
     except:
-        print("Warning: Could not parse scorer JSON")
+        logger.warning("Warning: Could not parse scorer JSON")
         ats_score   = 0
         suggestions = []
         violations  = []
         passed      = False
-    print(f"   ATS Score: {ats_score}/100 | Passed: {passed}")
+    logger.info(f"   ATS Score: {ats_score}/100 | Passed: {passed}")
 
     if violations:
-        print(f"   ATS Score: {ats_score}/100 | Passed: {passed}")
+        logger.info(f"   ATS Score: {ats_score}/100 | Passed: {passed}")
         
     return {
         **state,

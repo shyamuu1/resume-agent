@@ -2,15 +2,15 @@
 """Rewriter module."""
 
 import json
-from langchain_ollama import OllamaLLM
 from state import AgentState
+from utils.llm_utils import get_Logger, invoke_llm, require_keys
 
 
-llm = OllamaLLM(model="llama3.2")
+logger = get_Logger("RewriterNode")
 
 def rewriter_node(state: AgentState) -> dict:
-    print(">>> Running rewriter node ...")
-
+    logger.info(">>> Running rewriter node ...")
+    require_keys(state, "jd_keywords", "gap_analysis", "raw_resume", "iteration")
     gap = state["gap_analysis"]
     prompt = f"""
     You are a professional resume writer. Rewrite the resume below to better match the job.
@@ -41,6 +41,6 @@ def rewriter_node(state: AgentState) -> dict:
 
     Rewritten Resume:
     """
-    tailored = llm.invoke(prompt).strip()
-    print(f"   Rewrite Complete - {len(tailored)-1} words")
+    tailored = invoke_llm(prompt)
+    logger.info(f"   Rewrite Complete - {len(tailored)-1} words")
     return {**state, "tailored_resume": tailored, "iteration": state["iteration"] + 1}
