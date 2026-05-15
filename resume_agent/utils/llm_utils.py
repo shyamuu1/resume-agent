@@ -27,6 +27,7 @@ def invoke_llm(prompt:str) -> str:
         return clean_llm_output(raw_response)
     except Exception as ex:
         logging.warning(f"LLM invocation failed: {ex}")
+        raise
 
 def parse_json(raw: str) -> dict:
     try:
