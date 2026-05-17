@@ -4,6 +4,8 @@ import json
 from langchain_ollama import OllamaLLM
 from typing import List, Dict, Any
 
+from resume_agent.exception import AgentError, AgentErrorCode
+
 _llm: OllamaLLM | None = None
 
 def get_llm() -> OllamaLLM:
@@ -27,15 +29,17 @@ def invoke_llm(prompt:str) -> str:
         return clean_llm_output(raw_response)
     except Exception as ex:
         logging.warning(f"LLM invocation failed: {ex}")
+        raise AgentError(AgentErrorCode.LLM_INVOCATION_ERROR, "Failed to invoke LLM", details=str(ex))
 
 def parse_json(raw: str) -> dict:
     try:
         return json.loads(raw)
     except json.JSONDecodeError as ex:
         logging.warning(f"Failed to parse JSON: {ex}")
-        raise
+        raise AgentError(AgentErrorCode.JSON_PARSING_ERROR, "Failed to parse JSON from LLM response", details=str(ex))
 
 def require_keys(state:dict, *keys):
     missing = [key for key in keys if key not in state]
     if missing:
-        raise KeyError(f"Missing required keys in state: {missing}")
+        raise AgentError(AgentErrorCode.STATE_VALIDATION_ERROR, f"Missing required keys in state: {missing}")
+    

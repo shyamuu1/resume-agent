@@ -1,9 +1,9 @@
 """Scraper Module"""
 
 import urllib
-from utils.llm_utils import get_Logger
+from utils import llm_utils
 
-logger = get_Logger("ScraperNode")
+logger = llm_utils.get_Logger("ScraperNode")
 
 def scrape_job_description(url: str) -> str:
     """

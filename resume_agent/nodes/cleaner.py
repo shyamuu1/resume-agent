@@ -1,9 +1,7 @@
-
-from langchain_ollama import OllamaLLM
 import re
 import json
 from state import AgentState
-from utils.llm_utils import get_Logger, invoke_llm, parse_json, require_keys
+from utils import llm_utils
 
 #Patterns to strip before using LLM
 NOISE_PATTERNS = [
@@ -20,7 +18,7 @@ NOISE_PATTERNS = [
     r"#{1,6}\s*",            # markdown headers from Jina
 ]
 
-logger = get_Logger("CleanerNode")
+logger = llm_utils.get_Logger("CleanerNode")
 
 def clean_raw_text(text:str) -> str:
     for pattern in NOISE_PATTERNS:
@@ -32,7 +30,7 @@ def clean_raw_text(text:str) -> str:
 
 def cleaner_node(state: AgentState) -> dict:
     logger.info(">>> Cleaning raw job description and resume text...")
-    require_keys(state, "job_description")
+    llm_utils.require_keys(state, "job_description")
     #1. Clean noise patterns
     pre_cleaned = clean_raw_text(state["job_description"])
 
@@ -74,10 +72,10 @@ def cleaner_node(state: AgentState) -> dict:
         "about_company": ""
     }}
     """
-    cleaned = invoke_llm(prompt)
+    cleaned = llm_utils.invoke_llm(prompt)
 
     try:
-        structured = parse_json(cleaned)
+        structured = llm_utils.parse_json(cleaned)
         #Rebuild a clean job description for down stream nodes
         cleaned_jd = f"""
         Job Title: {structured.get('job_title', '')}

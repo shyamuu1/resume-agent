@@ -1,15 +1,14 @@
 # scorer.py
 """Scorer module."""
 import json
-import re
 from state import AgentState
-from utils.llm_utils import get_Logger, invoke_llm, parse_json, require_keys
+from utils import llm_utils
 
-logger = get_Logger("ScorerNode")
+logger = llm_utils.get_Logger("ScorerNode")
 
 def scorer_node(state:AgentState) -> dict:
     logger.info(">>> Running scorer node... ")
-    require_keys(state, "jd_keywords", "jd_requirements", "raw_resume", "tailored_resume")
+    llm_utils.require_keys(state, "jd_keywords", "jd_requirements", "raw_resume", "tailored_resume")
     prompt = f"""
      You are an ATS (Applicant Tracking System) and resume quality evaluator.
 
@@ -43,10 +42,10 @@ def scorer_node(state:AgentState) -> dict:
         "passed": <true if ats_score >= 75 and integrity_violations is empty, else false>
     }}
     """
-    cleaned = invoke_llm(prompt)
+    cleaned = llm_utils.invoke_llm(prompt)
 
     try:
-        parsed = parse_json(cleaned)
+        parsed = llm_utils.parse_json(cleaned)
         ats_score = parsed.get("ats_score", 0)
         suggestions = parsed.get("suggestions", [])
         violations = parsed.get("integrity_violations", [])

@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=65.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "resume-agent"
+version = "0.1.0"
+description = "A resume tailoring pipeline that scrapes job postings, extracts requirements, and rewrites resumes using LLMs."
+readme = "resume_agent/README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+  { name = "Your Name", email = "you@example.com" }
+]
+keywords = ["resume", "ATS", "LLM", "job-posting", "automation"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Operating System :: OS Independent"
+]
+
+dependencies = [
+  "langchain_ollama",
+  "langgraph",
+  "pypdf",
+  "pdf2image",
+  "pytesseract"
+]
+
+[project.optional-dependencies]
+test = ["pytest", "pytest-cov", "pytest-mock"]
+ocr = [
+  "pytesseract",
+  "pdf2image"
+]
+
+[tool.setuptools]
+packages = ["resume_agent"]

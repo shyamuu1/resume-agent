@@ -3,14 +3,14 @@
 
 import json
 from state import AgentState
-from utils.llm_utils import get_Logger, invoke_llm, require_keys
+from utils import llm_utils
 
 
-logger = get_Logger("RewriterNode")
+logger = llm_utils.get_Logger("RewriterNode")
 
 def rewriter_node(state: AgentState) -> dict:
     logger.info(">>> Running rewriter node ...")
-    require_keys(state, "jd_keywords", "gap_analysis", "raw_resume", "iteration")
+    llm_utils.require_keys(state, "jd_keywords", "gap_analysis", "raw_resume", "iteration")
     gap = state["gap_analysis"]
     prompt = f"""
     You are a professional resume writer. Rewrite the resume below to better match the job.
@@ -41,6 +41,6 @@ def rewriter_node(state: AgentState) -> dict:
 
     Rewritten Resume:
     """
-    tailored = invoke_llm(prompt)
+    tailored = llm_utils.invoke_llm(prompt)
     logger.info(f"   Rewrite Complete - {len(tailored)-1} words")
     return {**state, "tailored_resume": tailored, "iteration": state["iteration"] + 1}

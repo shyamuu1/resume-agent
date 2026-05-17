@@ -1,21 +1,23 @@
+import sys
 import textwrap
 from graph import graph
 from state import AgentState
 from tools.scraper import scrape_job_description
 from utils.llm_utils import get_Logger
+from exception.AgentError import AgentError
 
 logger = get_Logger("Main")
 
 
 def run_agent(job_url: str, raw_resume: str) -> AgentState:
 
-    print("\n========================================")
-    print("   Resume Tailoring Agent Starting...")
-    print("========================================\n")
+    logger.info("\n========================================")
+    logger.info("   Resume Tailoring Agent Starting...")
+    logger.info("========================================\n")
 
-    print(">> Scraping job posting...")
+    logger.info(">> Scraping job posting...")
     raw_job_posting = scrape_job_description(job_url)
-    print(f"   Scraped {len(raw_job_posting)} characters")
+    logger.info(f"   Scraped {len(raw_job_posting)} characters")
 
     initial_state = {
         "raw_job_posting":        raw_job_posting,
@@ -64,4 +66,11 @@ if __name__ == "__main__":
         Python, Flask, FastAPI, MySQL, Git, Linux
     """
     dedent_raw_resume = textwrap.dedent(raw_resume)
-    run_agent(job_url, dedent_raw_resume)
+    try:
+        run_agent(job_url, dedent_raw_resume)
+    except AgentError as agent_error:
+        logger.error(f"Agent error occurred: {agent_error}")
+        sys.exit(1)
+    except Exception as e:
+        logger.exception(f"An unexpected error occurred: {e}")
+        sys.exit(1)

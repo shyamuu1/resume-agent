@@ -1,14 +1,13 @@
-# analyzer.py
 
 import json
 from state import AgentState
-from utils.llm_utils import get_Logger, invoke_llm, parse_json, require_keys
+from utils import llm_utils
 
-logger = get_Logger("AnalyzerNode")
+logger = llm_utils.get_Logger("AnalyzerNode")
 
 def analyze_node(state:AgentState) -> dict:
     logger.info(">>> Running analyzer node ...")
-    require_keys(state, "jd_requirements", "jd_keywords", "raw_resume")
+    llm_utils.require_keys(state, "jd_requirements", "jd_keywords", "raw_resume")
     prompt = f"""
     Compare this resume against the job requirements and classify each requirement.
 
@@ -29,9 +28,9 @@ def analyze_node(state:AgentState) -> dict:
     }}
     """
 
-    cleaned = invoke_llm(prompt)
+    cleaned = llm_utils.invoke_llm(prompt)
     try:
-        parsed = parse_json(cleaned)
+        parsed = llm_utils.parse_json(cleaned)
         gap_analysis = {
             "strong_matches": parsed.get("strong_matches", []),
             "weak_matches": parsed.get("weak_matches", []),
