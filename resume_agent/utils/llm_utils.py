@@ -4,7 +4,7 @@ import json
 from langchain_ollama import OllamaLLM
 from typing import List, Dict, Any
 
-from resume_agent.exception import AgentError, AgentErrorCode
+from exception import AgentError, AgentErrorCode
 
 _llm: OllamaLLM | None = None
 

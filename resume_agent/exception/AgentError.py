@@ -1,4 +1,4 @@
-import AgentErrorCode
+from .AgentErrorCode import AgentErrorCode
 
 class AgentError(Exception):
 
